@@ -7,8 +7,14 @@ const commentSchema = new mongoose.Schema(
     mediaType: { type: String, required: true },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
       required: true,
+      refPath: 'userModel' // Tham chiếu động dựa vào trường userModel bên dưới
+    },
+    userModel: {
+      type: String,
+      required: true,
+      enum: ['User', 'Admin'], // Chỉ nhận 'User' hoặc 'Admin'
+      default: 'User'
     },
     isReported: { 
         type: Boolean, 

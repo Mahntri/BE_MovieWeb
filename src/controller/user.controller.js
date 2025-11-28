@@ -1,33 +1,42 @@
-import { UserModel, AccountModel } from "../model/index.js";
+import { UserModel, AccountModel, AdminModel } from "../model/index.js"; // 👈 Thêm AdminModel
 import bcrypt from "bcrypt";
 
 const userController = {
+  // 1. THÊM/XÓA YÊU THÍCH (Hỗ trợ cả Admin)
   toggleFavorite: async (req, res) => {
     try {
-      const { userId } = req.user;
+      const { userId, role } = req.user; // 👈 Lấy thêm role từ token
       const { movieId } = req.body;
 
-      const user = await UserModel.findOne({ accountId: userId });
-      if (!user) {
-        throw new Error("User profile not found");
+      let profile = null;
+
+      // 👇 KIỂM TRA ROLE ĐỂ CHỌN ĐÚNG BẢNG
+      if (role === "ADMIN") {
+        profile = await AdminModel.findOne({ accountId: userId });
+      } else {
+        profile = await UserModel.findOne({ accountId: userId });
       }
 
-      const index = user.favorites.indexOf(movieId);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const index = profile.favorites.indexOf(movieId);
 
       let message = "";
       if (index === -1) {
-        user.favorites.push(movieId);
+        profile.favorites.push(movieId);
         message = "Added to favorites";
       } else {
-        user.favorites.splice(index, 1);
+        profile.favorites.splice(index, 1);
         message = "Removed from favorites";
       }
 
-      await user.save();
+      await profile.save();
 
       res.status(200).send({
         message,
-        data: user.favorites,
+        data: profile.favorites,
       });
     } catch (error) {
       res
@@ -36,18 +45,28 @@ const userController = {
     }
   },
 
+  // 2. LẤY DANH SÁCH YÊU THÍCH (Hỗ trợ cả Admin)
   getMyFavorites: async (req, res) => {
     try {
-      const { userId } = req.user;
+      const { userId, role } = req.user; // 👈 Lấy thêm role
 
-      const user = await UserModel.findOne({ accountId: userId });
-      if (!user) {
-        throw new Error("User profile not found");
+      let profile = null;
+
+      // 👇 KIỂM TRA ROLE
+      if (role === "ADMIN") {
+        profile = await AdminModel.findOne({ accountId: userId });
+      } else {
+        profile = await UserModel.findOne({ accountId: userId });
+      }
+
+      if (!profile) {
+        // Nếu chưa có profile thì trả về mảng rỗng để không bị lỗi
+        return res.status(200).send({ message: "Favorites fetched", data: [] });
       }
 
       res.status(200).send({
         message: "Favorites fetched",
-        data: user.favorites,
+        data: profile.favorites,
       });
     } catch (error) {
       res
@@ -56,9 +75,10 @@ const userController = {
     }
   },
 
+  // 3. CẬP NHẬT PROFILE (Hỗ trợ cả Admin)
   updateProfile: async (req, res) => {
     try {
-      const { userId } = req.user;
+      const { userId, role } = req.user; // 👈 Lấy role
       const { fullName, password } = req.body;
       const fileData = req.file;
 
@@ -67,12 +87,20 @@ const userController = {
         updateData.avatar = fileData.path;
       }
 
-      const updatedUser = await UserModel.findOneAndUpdate(
+      // 👇 CHỌN MODEL DỰA TRÊN ROLE
+      let Model = role === "ADMIN" ? AdminModel : UserModel;
+
+      const updatedProfile = await Model.findOneAndUpdate(
         { accountId: userId },
         updateData,
         { new: true }
       );
 
+      if (!updatedProfile) {
+          throw new Error("Profile not found to update");
+      }
+
+      // Cập nhật mật khẩu bên bảng Account (Chung cho cả 2)
       if (password) {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -85,8 +113,8 @@ const userController = {
         message: "Update successfully", 
         data: {
             username: account.username,
-            fullName: updatedUser.fullName,
-            avatar: updatedUser.avatar,
+            fullName: updatedProfile.fullName,
+            avatar: updatedProfile.avatar,
             role: account.role
         } 
       });
