@@ -4,6 +4,7 @@ import adminRouter from "./admin.router.js";
 import userRouter from "./user.router.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import commentRouter from "./comment.router.js";
+import reportRouter from "./report.router.js";
 
 const router = Router();
 
@@ -23,5 +24,7 @@ router.use(
 );
 
 router.use("/comments", commentRouter);
+
+router.use("/reports", reportRouter);
 
 export default router;

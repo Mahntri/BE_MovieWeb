@@ -48,13 +48,18 @@ const commentController = {
   getComments: async (req, res) => {
     try {
       const { mediaType, mediaId } = req.params;
+      
+      // 👇 Lấy tham số sort từ URL (ví dụ: ?sort=asc)
+      // Mặc định là 'desc' (Mới nhất) nếu không truyền
+      const { sort } = req.query; 
+      const sortOrder = sort === 'asc' ? 1 : -1; // 1: Tăng dần (Cũ nhất), -1: Giảm dần (Mới nhất)
+
       const comments = await CommentModel.find({ mediaType, mediaId })
         .populate({
             path: "userId",
-            // Mongoose sẽ tự nhìn vào field 'userModel' để biết nhảy sang bảng User hay Admin
-            select: "fullName avatar accountId" 
+            select: "fullName avatar accountId"
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: sortOrder }); // 👇 Sắp xếp động tại đây
 
       res.status(200).send({ data: comments });
     } catch (error) {
