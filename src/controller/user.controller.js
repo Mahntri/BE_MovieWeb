@@ -1,4 +1,6 @@
-import { UserModel, AccountModel, AdminModel } from "../model/index.js"; // Import đủ 3 model
+import UserModel from "../model/user.model.js";
+import AccountModel from "../model/account.model.js";
+import AdminModel from "../model/admin.model.js";
 import bcrypt from "bcrypt";
 
 const userController = {
