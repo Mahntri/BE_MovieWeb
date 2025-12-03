@@ -2,13 +2,13 @@ import mongoose from "mongoose";
 
 const reportSchema = new mongoose.Schema(
   {
-    mediaId: { type: String, required: true }, // ID phim
-    mediaType: { type: String, required: true }, // 'movie' hoặc 'tv'
-    title: { type: String, required: true }, // Tên phim (lưu luôn để Admin dễ nhìn)
-    description: { type: String, required: true }, // Mô tả lỗi (ví dụ: "Phim mất tiếng")
+    mediaId: { type: String, required: true },
+    mediaType: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Account", // Người báo cáo
+      ref: "Account",
       required: true,
     },
     status: { 

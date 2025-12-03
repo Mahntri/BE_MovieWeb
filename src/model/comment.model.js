@@ -8,12 +8,12 @@ const commentSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: 'userModel' // Tham chiếu động dựa vào trường userModel bên dưới
+      refPath: 'userModel'
     },
     userModel: {
       type: String,
       required: true,
-      enum: ['User', 'Admin'], // Chỉ nhận 'User' hoặc 'Admin'
+      enum: ['User', 'Admin'],
       default: 'User'
     },
     isReported: { 

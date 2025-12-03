@@ -21,11 +21,11 @@ const reportController = {
     }
   },
 
-  // 2. Admin lấy danh sách báo lỗi (Chỉ lấy những cái chưa sửa PENDING)
+  // 2. Admin lấy danh sách báo lỗi
   getPendingReports: async (req, res) => {
     try {
       const reports = await ReportModel.find({ status: "PENDING" })
-        .populate("userId", "username") // Lấy tên người báo cáo
+        .populate("userId", "username")
         .sort({ createdAt: -1 });
         
       res.status(200).send({ data: reports });
@@ -34,14 +34,13 @@ const reportController = {
     }
   },
 
-  // 3. Admin xác nhận đã sửa lỗi (Chuyển status thành FIXED hoặc Xóa luôn)
+  // 3. Admin xác nhận đã sửa lỗi
   resolveReport: async (req, res) => {
     try {
       const { id } = req.params;
-      // Cách 1: Xóa luôn khỏi danh sách
       await ReportModel.findByIdAndDelete(id);
       
-      // Cách 2 (Nếu muốn lưu lịch sử): await ReportModel.findByIdAndUpdate(id, { status: "FIXED" });
+      // (Nếu muốn lưu lịch sử): await ReportModel.findByIdAndUpdate(id, { status: "FIXED" });
 
       res.status(200).send({ message: "Issue resolved" });
     } catch (error) {

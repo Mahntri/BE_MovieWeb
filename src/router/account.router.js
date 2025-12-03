@@ -10,36 +10,36 @@ const accountRouter = Router();
 accountRouter.post(
   "/register",
   validationMiddleware(accountValidationSchema.register),
-  accountController.createAccount // 👈 Phải có hàm này
+  accountController.createAccount
 );
 
 // Đăng nhập
 accountRouter.post(
   "/login",
   validationMiddleware(accountValidationSchema.login),
-  accountController.login // 👈 Phải có hàm này
+  accountController.login
 );
 
 // Profile
 accountRouter.get(
   "/profile",
   authMiddleware.authenticate,
-  accountController.getProfile // 👈 Phải có hàm này
+  accountController.getProfile
 );
 
 // Đổi mật khẩu
 accountRouter.put(
   "/password", 
   authMiddleware.authenticate, 
-  accountController.changePassword // 👈 Phải có hàm này
+  accountController.changePassword
 );
 
 // Quên mật khẩu
 accountRouter.post("/verify-otp", accountController.verifyOTP);
-accountRouter.post("/forgot-password", accountController.forgotPassword); // 👈 Phải có hàm này
-accountRouter.post("/reset-password", accountController.resetPassword);   // 👈 Phải có hàm này
+accountRouter.post("/forgot-password", accountController.forgotPassword);
+accountRouter.post("/reset-password", accountController.resetPassword);
 
 // Tạo Admin
-accountRouter.post("/register-admin", accountController.createAdmin);     // 👈 Phải có hàm này
+accountRouter.post("/register-admin", accountController.createAdmin);
 
 export default accountRouter;

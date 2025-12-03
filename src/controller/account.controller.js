@@ -52,7 +52,6 @@ const accountController = {
       };
       const token = jwt.sign(payload, secretKey, { expiresIn: "24h" });
 
-      // Lấy profile
       let profile = null;
       if (account.role === "ADMIN") {
         profile = await AdminModel.findOne({ accountId: account._id });
@@ -118,7 +117,7 @@ const accountController = {
     }
   },
 
-  // 5. Quên mật khẩu (Gửi OTP)
+  // 5. Quên mật khẩu
   forgotPassword: async (req, res) => {
     try {
       const { email } = req.body;
@@ -144,7 +143,7 @@ const accountController = {
       const account = await AccountModel.findOne({ 
         email,
         resetPasswordToken: otp,
-        resetPasswordExpires: { $gt: Date.now() } // Kiểm tra còn hạn
+        resetPasswordExpires: { $gt: Date.now() }
       });
 
       if (!account) return res.status(400).send({ message: "Mã OTP không chính xác hoặc đã hết hạn" });
@@ -155,7 +154,7 @@ const accountController = {
     }
   },
 
-  // 6. Đặt lại mật khẩu (Verify OTP)
+  // 6. Đặt lại mật khẩu
   resetPassword: async (req, res) => {
     try {
       const { email, otp, newPassword } = req.body;
@@ -180,10 +179,9 @@ const accountController = {
     }
   },
 
-  // 7. Tạo Admin (Hàm bí mật)
+  // 7. Tạo Admin
   createAdmin: async (req, res) => {
       try {
-        // 👇 PHẢI CÓ 'email' Ở ĐÂY
         const { username, password, fullName, secretCode, email } = req.body;
 
         if (secretCode !== "movie_web_vip") return res.status(403).send({ message: "Sai mã bí mật!" });
@@ -191,7 +189,6 @@ const accountController = {
         const existAccount = await AccountModel.findOne({ username });
         if (existAccount) throw new Error("Username already exists");
         
-        // Kiểm tra email tồn tại chưa
         const existEmail = await AccountModel.findOne({ email });
         if (existEmail) throw new Error("Email already exists");
 
@@ -201,7 +198,7 @@ const accountController = {
         const newAccount = await AccountModel.create({
           username,
           password: hashedPassword,
-          email, // 👈 QUAN TRỌNG: Lưu email vào DB
+          email,
           role: "ADMIN",
           isActive: true,
         });
