@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "be",
   "builds": [
     {
       "src": "index.js",
@@ -9,7 +10,12 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/index.js"
+      "dest": "index.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "installCommand": "npm install",
+  "buildCommand": "npm run build"
 }
