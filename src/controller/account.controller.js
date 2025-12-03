@@ -122,33 +122,35 @@ const accountController = {
     try {
       const { email } = req.body;
       const account = await AccountModel.findOne({ email });
-      
-      // 👇 LOGIC MỚI: DÙ CÓ HAY KHÔNG CŨNG TRẢ VỀ THÀNH CÔNG
-      
-      if (account) {
-          // TRƯỜNG HỢP 1: Email có thật -> Tạo OTP và gửi mail thật
-          const otp = Math.floor(100000 + Math.random() * 900000).toString();
-          account.resetPasswordToken = otp;
-          account.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 phút
-          await account.save();
+      if (!account) return res.status(404).send({ message: "Email không tồn tại" });
 
-          // Gửi mail (Không dùng await để tránh lộ thời gian xử lý khác biệt giữa có và không có email)
-          sendResetEmail(email, otp).catch(err => console.error("Lỗi gửi mail:", err));
-      } else {
-          // TRƯỜNG HỢP 2: Email ảo -> Không làm gì cả (hoặc log lại để admin biết)
-          // Nhưng tuyệt đối KHÔNG báo lỗi cho người dùng
-          console.log(`[Security] Có người thử reset pass với email lạ: ${email}`);
-      }
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      account.resetPasswordToken = otp;
+      account.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
+      await account.save();
 
-      // 👇 LUÔN LUÔN TRẢ VỀ 200 OK
-      // Để Frontend chuyển sang màn hình nhập OTP
-      res.status(200).send({ 
-          message: "Gửi OTP thành công. Vui lòng kiểm tra hộp thư." 
+      await sendResetEmail(email, otp);
+      res.status(200).send({ message: "OTP sent" });
+    } catch (error) {
+      res.status(500).send({ message: error.message });
+    }
+  },
+
+  verifyOTP: async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+      
+      const account = await AccountModel.findOne({ 
+        email,
+        resetPasswordToken: otp,
+        resetPasswordExpires: { $gt: Date.now() }
       });
 
+      if (!account) return res.status(400).send({ message: "Mã OTP không chính xác hoặc đã hết hạn" });
+
+      res.status(200).send({ message: "OTP verified" });
     } catch (error) {
-      // Chỉ báo lỗi khi Server sập thực sự
-      res.status(500).send({ message: "Lỗi hệ thống, vui lòng thử lại sau." });
+      res.status(500).send({ message: error.message });
     }
   },
 
