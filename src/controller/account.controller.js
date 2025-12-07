@@ -146,7 +146,7 @@ const accountController = {
         resetPasswordExpires: { $gt: Date.now() }
       });
 
-      if (!account) return res.status(400).send({ message: "Mã OTP không chính xác hoặc đã hết hạn" });
+      if (!account) return res.status(400).send({ message: "The OTP code is incorrect or has expired" });
 
       res.status(200).send({ message: "OTP verified" });
     } catch (error) {
@@ -164,7 +164,7 @@ const accountController = {
         resetPasswordExpires: { $gt: Date.now() }
       });
 
-      if (!account) return res.status(400).send({ message: "OTP sai hoặc hết hạn" });
+      if (!account) return res.status(400).send({ message: "Invalid or expired OTP" });
 
       const salt = await bcrypt.genSalt(10);
       account.password = await bcrypt.hash(newPassword, salt);
